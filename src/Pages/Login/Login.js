@@ -39,7 +39,7 @@ const Login = () => {
             />
             {errors.password && <p className="text-red-600 text-sm">{errors.password?.message}</p>}
             <label className="label">
-              <span className="label-text">Forget Password?</span>
+              <span className="label-text">Forgot Password?</span>
             </label>
           </div>
           <input className="btn btn-accent w-full mt-3" value="Login" type="submit" />
