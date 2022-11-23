@@ -1,21 +1,23 @@
 import React, { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../contexts/AuthProvider";
+import useToken from "../../hooks/useToken";
 
 const SignUp = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
-
+  const { register, handleSubmit, formState: { errors }, } = useForm(); // prettier-ignore
   const { createUser, updateUser } = useContext(AuthContext);
   const [signUpError, setSignUpError] = useState("");
+  const [createdUserEmail, setCreatedUserEmail] = useState("");
+  const [token] = useToken(createdUserEmail);
+  const navigate = useNavigate();
+
+  if (token) {
+    navigate("/");
+  }
 
   const handleSignUp = (data) => {
-    console.log(data);
     setSignUpError("");
     createUser(data.email, data.password)
       .then((result) => {
@@ -25,15 +27,33 @@ const SignUp = () => {
         const userInfo = {
           displayName: data.name,
         };
-        console.log("aaaa", userInfo);
         updateUser(userInfo)
-          .then(() => {})
+          .then(() => {
+            saveUser(data.name, data.email);
+          })
           .catch((err) => console.error(err));
       })
       .catch((error) => {
         console.error(error);
         setSignUpError(error.message);
       });
+  };
+
+  const saveUser = (name, email) => {
+    const user = { name, email };
+    fetch("http://localhost:5000/users", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(user),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        setCreatedUserEmail(email); // here we can check first if(data.acknowledged)
+      })
+      .catch((err) => console.error(err));
   };
 
   return (
